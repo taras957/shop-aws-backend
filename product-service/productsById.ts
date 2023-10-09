@@ -1,0 +1,21 @@
+import { APIGatewayProxyHandler } from "aws-lambda";
+import "source-map-support/register";
+import { products } from "./mock";
+
+export const getProductsById: APIGatewayProxyHandler = async (event) => {
+  try {
+    const { productId } = event.pathParameters;
+
+    return {
+      statusCode: 200,
+      body: JSON.stringify({
+        products: products.filter((product) => product.id === productId),
+      }),
+    };
+  } catch (error) {
+    return {
+      statusCode: 500,
+      body: JSON.stringify({ error: "An error occurred" }),
+    };
+  }
+};
