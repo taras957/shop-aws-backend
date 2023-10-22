@@ -17,6 +17,13 @@ export class StockDB extends DB {
     return this.createItem(params);
   }
 
+  async getAll() {
+    const params = {
+      TableName: this.tableName,
+    };
+    return this.getItems(params);
+  }
+
   async updateStock(stock: Stock) {
     const params = {
       TableName: this.tableName,

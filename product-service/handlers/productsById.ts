@@ -1,11 +1,12 @@
 import { APIGatewayEvent } from "aws-lambda";
 import { ProductDB } from "../domain/product/product.controller";
+import { StockDB } from "../domain/stock/stock.controller";
 
 export const getProductsById = async (event: APIGatewayEvent) => {
   try {
-    const id = event.queryStringParameters?.productId;
+    const id = event.pathParameters.productId;
 
-    const db = new ProductDB();
+    const db = new ProductDB(StockDB);
     const product = await db.getProduct(id);
     return {
       statusCode: 200,

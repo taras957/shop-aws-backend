@@ -1,12 +1,17 @@
 import DB from "../../utils/db";
+import { mergeByProp } from "../../utils/mergeByProps";
+import { Stock } from "../stock/model";
+import { StockDB } from "../stock/stock.controller";
 import { Product } from "./model";
 
 class ProductDB extends DB {
   private readonly tableName: DB_Table;
+  readonly stockDb: StockDB;
 
-  constructor() {
+  constructor(Stock: typeof StockDB) {
     super();
     this.tableName = process.env.PRODUCT_TABLE_NAME as string;
+    this.stockDb = new Stock();
   }
 
   async createProduct(product: Product) {
@@ -22,7 +27,12 @@ class ProductDB extends DB {
       TableName: this.tableName,
     };
 
-    return this.getItems(params);
+    const products = (await this.getItems(params)).Items as Array<Product>;
+    const stocks = (await this.stockDb.getAll()).Items as Array<Stock>;
+
+    const joined = mergeByProp(products, stocks, "id", "product_id");
+
+    return joined;
   }
 
   async getProduct(productId: string) {
