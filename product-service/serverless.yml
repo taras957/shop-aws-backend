@@ -57,11 +57,12 @@ functions:
     environment:
       PRODUCT_TABLE_NAME: Products
       STOCK_TABLE_NAME: stock
-      DB_REGION: eu-north-1
+      DB_REGION: eu-west-1
     events:
       - http:
           path: products
           method: get
+
 
   productsById:
     handler: ./handlers/productsById.getProductsById
