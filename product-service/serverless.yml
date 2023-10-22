@@ -1,36 +1,86 @@
+//this file has to be moved to dist folder
 service: product-service
-# app and org for use with dashboard.serverless.com
-#app: your-app-name
-#org: your-org-name
 
-custom:
-  webpack:
-    webpackConfig: ./webpack.config.js
-    includeModules: true
-
-# Add the serverless-webpack plugin
 plugins:
-  - serverless-webpack
+  - serverless-offline
+
 provider:
   name: aws
   runtime: nodejs18.x
   apiGateway:
-    minimumCompressionSize: 1024 # Enable gzip compression for responses > 1 KB
+    minimumCompressionSize: 1024
   environment:
     AWS_NODEJS_CONNECTION_REUSE_ENABLED: 1
   stage: dev
   region: eu-west-1
+  iamRoleStatements:
+    - Effect: Allow
+      Action:
+        - dynamodb:Scan
+      Resource:
+        - "arn:aws:dynamodb:eu-north-1:601172069419:table/Products"
+        # Add additional permissions for your tables here if needed.
+
+resources:
+  Resources:
+    ProductsTable:
+      Type: AWS::DynamoDB::Table
+      Properties:
+        TableName: Products
+        BillingMode: PAY_PER_REQUEST
+        AttributeDefinitions:
+          - AttributeName: id
+            AttributeType: S
+          - AttributeName: title
+            AttributeType: S
+        KeySchema:
+          - AttributeName: id
+            KeyType: HASH
+          - AttributeName: title
+            KeyType: RANGE
+
+    StockTable:
+     Type: AWS::DynamoDB::Table
+     Properties:
+      TableName: stock
+      BillingMode: PAY_PER_REQUEST
+      AttributeDefinitions:
+        - AttributeName: product_id
+          AttributeType: S
+      KeySchema:
+        - AttributeName: product_id
+          KeyType: HASH
 
 functions:
   products:
-    handler: products.getProductsList
+    handler: ./handlers/getProducts.getProductsList
+    environment:
+      PRODUCT_TABLE_NAME: Products
+      STOCK_TABLE_NAME: stock
+      DB_REGION: eu-north-1
     events:
       - http:
           path: products
           method: get
+
   productsById:
-    handler: productsById.getProductsById
+    handler: ./handlers/productsById.getProductsById
+    environment:
+      PRODUCT_TABLE_NAME: Products
+      STOCK_TABLE_NAME: stock
+      DB_REGION: eu-west-1
     events:
       - http:
           path: products/{productId}
           method: get
+
+  createProduct:
+    handler: ./handlers/createProduct.create
+    environment:
+      PRODUCT_TABLE_NAME: Products
+      STOCK_TABLE_NAME: stock
+      DB_REGION: eu-west-1
+    events:
+      - http:
+          path: product
+          method: post
