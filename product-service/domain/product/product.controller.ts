@@ -14,11 +14,16 @@ class ProductDB extends DB {
     this.stockDb = new Stock();
   }
 
-  async createProduct(product: Product) {
+  async createProduct(product: Product & Pick<Stock, "count">) {
     const params = {
       TableName: this.tableName,
       Item: product,
     };
+
+    await this.stockDb.createStockItem({
+      product_id: product.id,
+      count: product.count,
+    });
     return this.createItem(params);
   }
 

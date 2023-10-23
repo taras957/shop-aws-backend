@@ -5,7 +5,7 @@ import { StockDB } from "../domain/stock/stock.controller";
 
 export const create = async (event: APIGatewayEvent) => {
   try {
-    const { title, description, price } = JSON.parse(event.body);
+    const { title, description, price, count } = JSON.parse(event.body);
 
     const db = new ProductDB(StockDB);
     const product = await db.createProduct({
@@ -13,6 +13,7 @@ export const create = async (event: APIGatewayEvent) => {
       title,
       description,
       price,
+      count,
     });
 
     return {
