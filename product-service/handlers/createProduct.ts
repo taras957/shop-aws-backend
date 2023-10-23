@@ -1,15 +1,11 @@
-import { APIGatewayProxyHandler } from "aws-lambda";
+import { APIGatewayEvent, APIGatewayProxyHandler } from "aws-lambda";
 import * as crypto from "crypto";
 import { ProductDB } from "../domain/product/product.controller";
 import { StockDB } from "../domain/stock/stock.controller";
 
-export const create = async (event: {
-  title: string;
-  description: string;
-  price: number;
-}) => {
+export const create = async (event: APIGatewayEvent) => {
   try {
-    const { title, description, price } = event || {};
+    const { title, description, price } = JSON.parse(event.body);
 
     const db = new ProductDB(StockDB);
     const product = await db.createProduct({
@@ -30,7 +26,7 @@ export const create = async (event: {
   } catch (error) {
     return {
       statusCode: 500,
-      body: JSON.stringify({ error }),
+      body: JSON.stringify({ error: "An error occurred" }),
     };
   }
 };
