@@ -5,7 +5,7 @@
   "main": "handler.js",
   "scripts": {
     "dev": "sls offline -s dev",
-    "deploy": "npx tsc && sls deploy",
+    "deploy": "npx tsc && node build && cd dist && sls deploy",
     "seed": "node seed/index.js && npm run aws-batch-write",
     "aws-batch-write": "aws dynamodb batch-write-item --region eu-west-1 --request-items file://seed/products.json && aws dynamodb batch-write-item --region eu-west-1 --request-items file://seed/stock.json"
 
