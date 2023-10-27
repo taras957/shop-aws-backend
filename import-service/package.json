@@ -5,7 +5,7 @@
   "node": "18.0.0",
   "main": "handlers/handler.js",
   "scripts": {
-    "deploy": "npx tsc && node build && cd dist && sls deploy",
+    "deploy": "sls deploy",
     "test": "serverless-bundle"
   },
   "dependencies": {
