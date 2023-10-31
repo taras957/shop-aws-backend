@@ -90,6 +90,7 @@ resources:
 functions:
   products:
     handler: ./handlers/getProducts.getProductsList
+    url: true
     environment:
       PRODUCT_TABLE_NAME: Products
       STOCK_TABLE_NAME: stock
@@ -98,10 +99,13 @@ functions:
       - http:
           path: products
           method: get
+          cors: true
+
 
 
   productsById:
     handler: ./handlers/productsById.getProductsById
+    url: true
     environment:
       PRODUCT_TABLE_NAME: Products
       STOCK_TABLE_NAME: stock
@@ -110,9 +114,11 @@ functions:
       - http:
           path: products/{productId}
           method: get
+          cors: true
 
   createProduct:
     handler: ./handlers/createProduct.create
+    url: true
     environment:
       PRODUCT_TABLE_NAME: Products
       STOCK_TABLE_NAME: stock
@@ -121,3 +127,4 @@ functions:
       - http:
           path: product
           method: post
+          cors: true

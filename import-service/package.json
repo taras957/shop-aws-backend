@@ -6,7 +6,7 @@
   "main": "handlers/handler.js",
   "scripts": {
     "deploy": "sls deploy",
-    "test": "serverless-bundle"
+    "bundle": "serverless-bundle"
   },
   "dependencies": {
     "@aws-sdk/client-dynamodb": "^3.435.0",
