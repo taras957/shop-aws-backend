@@ -26,9 +26,9 @@ export class ObjectController {
     this.client = new S3Client({ region });
   }
 
-  createPresignedUrlWithClient({ bucket, key }) {
+  async createPresignedUrlWithClient({ bucket, key }) {
     const command = new PutObjectCommand({ Bucket: bucket, Key: key });
-    return getSignedUrl(this.client, command, { expiresIn: 3600 });
+    return getSignedUrl(this.s3, command, { expiresIn: 3600 });
   }
 
   async getObject({ bucket, key }: { bucket: string; key: string }) {

@@ -19,8 +19,14 @@ export async function handler(event: S3Event) {
     await objectController.copy(bucket, folder, objectName, "parsed");
 
     await objectController.delete(bucket, key);
-
-    return objectController.parse(s3Stream);
+    return {
+      headers: {
+        "Access-Control-Allow-Origin": "*",
+        "Access-Control-Allow-Credentials": true,
+      },
+      statusCode: 200,
+      body: JSON.stringify(await objectController.parse(s3Stream)),
+    };
   } catch (error) {
     return {
       statusCode: 500,

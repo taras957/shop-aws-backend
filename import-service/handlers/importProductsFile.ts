@@ -4,6 +4,7 @@ import { ObjectController } from "../controllers/object/object.controller";
 export const handler = async (event: APIGatewayEvent) => {
   try {
     const fileName = event.queryStringParameters!.name;
+
     const folderName = "uploaded";
     // get the name of the file to be uploaded
     const fileKey = `${folderName}/${fileName}`;
@@ -11,12 +12,16 @@ export const handler = async (event: APIGatewayEvent) => {
     //@todo use env instead
     const bucket = "import-bucket-aws";
     const controller = new ObjectController(region);
-    const url = controller.createPresignedUrlWithClient({
+    const url = await controller.createPresignedUrlWithClient({
       key: fileKey,
       bucket,
     });
 
     return {
+      headers: {
+        "Access-Control-Allow-Origin": "*",
+        "Access-Control-Allow-Credentials": true,
+      },
       statusCode: 200,
       body: JSON.stringify({ url }),
     };
