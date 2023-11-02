@@ -7,11 +7,7 @@ import {
   CopyObjectCommand,
   DeleteObjectCommand,
 } from "@aws-sdk/client-s3";
-import {
-  GetQueueUrlCommand,
-  SQSClient,
-  SendMessageCommand,
-} from "@aws-sdk/client-sqs";
+import { SQSClient, SendMessageCommand } from "@aws-sdk/client-sqs";
 
 import { getSignedUrl } from "@aws-sdk/s3-request-presigner";
 
@@ -50,21 +46,11 @@ export class ObjectController {
     return commandResult.Body as Readable;
   }
 
-  async getQueueUrl() {
-    const command = new GetQueueUrlCommand({ QueueName: "import-service" });
-
-    const response = await this.sqs.send(command);
-    return response;
-  }
-
   async queue(msg: string) {
     const queueUrl = process.env.SQS_URL; // Replace with your SQS queue URL
 
-    const url =
-      "https://sqs.eu-west-1.amazonaws.com/601172069419/import-service";
-
     const command = new SendMessageCommand({
-      QueueUrl: url,
+      QueueUrl: queueUrl,
       MessageBody: msg,
     });
 
