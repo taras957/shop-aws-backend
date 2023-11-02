@@ -1,20 +1,17 @@
 import { APIGatewayProxyHandler } from "aws-lambda";
-import "source-map-support/register";
-import { products } from "./mock";
-
-export const getProductsById: APIGatewayProxyHandler = async (event) => {
+import { ProductDB } from "../domain/product/product.controller";
+import { StockDB } from "../domain/stock/stock.controller";
+export const getProductsList: APIGatewayProxyHandler = async () => {
   try {
-    const { productId } = event.pathParameters;
-
+    const db = new ProductDB(StockDB);
+    const products = await db.getAllProducts();
     return {
       statusCode: 200,
       headers: {
         "Access-Control-Allow-Origin": "*",
         "Access-Control-Allow-Credentials": true,
       },
-      body: JSON.stringify({
-        products: products.filter((product) => product.id === productId),
-      }),
+      body: JSON.stringify(products || []),
     };
   } catch (error) {
     return {
