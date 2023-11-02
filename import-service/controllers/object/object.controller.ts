@@ -7,11 +7,18 @@ import {
   CopyObjectCommand,
   DeleteObjectCommand,
 } from "@aws-sdk/client-s3";
+import {
+  GetQueueUrlCommand,
+  SQSClient,
+  SendMessageCommand,
+} from "@aws-sdk/client-sqs";
 
 import { getSignedUrl } from "@aws-sdk/s3-request-presigner";
 
 import csv from "csv-parser";
 import { Readable } from "stream";
+
+type ProductList = Array<{ title: string; description: string; price: number }>;
 
 export const asStream = (response: GetObjectCommandOutput) => {
   return response.Body as Readable;
@@ -20,10 +27,12 @@ export const asStream = (response: GetObjectCommandOutput) => {
 export class ObjectController {
   client: S3Client;
   s3: S3;
+  sqs: SQSClient;
 
   constructor(region: string) {
     this.s3 = new S3({ region });
     this.client = new S3Client({ region });
+    this.sqs = new SQSClient({ region });
   }
 
   async createPresignedUrlWithClient({ bucket, key }) {
@@ -40,22 +49,49 @@ export class ObjectController {
 
     return commandResult.Body as Readable;
   }
-  parse(stream: Readable) {
+
+  async getQueueUrl() {
+    const command = new GetQueueUrlCommand({ QueueName: "import-service" });
+
+    const response = await this.sqs.send(command);
+    return response;
+  }
+
+  async queue(msg: string) {
+    const queueUrl = process.env.SQS_URL; // Replace with your SQS queue URL
+
+    const url =
+      "https://sqs.eu-west-1.amazonaws.com/601172069419/import-service";
+
+    const command = new SendMessageCommand({
+      QueueUrl: url,
+      MessageBody: msg,
+    });
+
+    const data = await this.sqs.send(command);
+  }
+
+  async send2Queue(stream: Readable) {
+    const products = await this.parse(stream);
+
+    for (const product of products) {
+      await this.queue(JSON.stringify(product));
+    }
+  }
+
+  parse(stream: Readable): Promise<ProductList> {
     return new Promise((resolve, reject) => {
       const results = [];
 
       stream
         .pipe(csv())
         .on("data", (data) => {
-          console.log("CSV Record:", data);
           results.push(data);
         })
-        .on("end", () => {
-          console.log("CSV Parsing Completed");
+        .on("end", async () => {
           resolve(results);
         })
         .on("error", (error) => {
-          console.error("Error parsing CSV:", error);
           reject(error);
         });
     });

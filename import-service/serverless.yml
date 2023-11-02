@@ -24,6 +24,8 @@ provider:
     minimumCompressionSize: 1024
   environment:
     AWS_NODEJS_CONNECTION_REUSE_ENABLED: 1
+    SQS_URL: 
+      Ref: catalogItemsQueue
   stage: dev
   region: eu-west-1
   iam:
@@ -55,16 +57,6 @@ functions:
           event: s3:ObjectCreated:*
           rules:
             - prefix: uploaded/
-  catalogBatchProcess:
-    handler: ./handlers/catalogBatchProcess.handler
-    url: true
-    events:
-    - sqs:
-        batchSize: 3
-        arn: 
-          Fn::GetAtt:
-            - catalogItemsQueue
-            - Arn
 
 resources:
   Resources:
