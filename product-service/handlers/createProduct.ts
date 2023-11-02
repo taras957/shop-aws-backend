@@ -1,4 +1,4 @@
-import { APIGatewayEvent, APIGatewayProxyHandler } from "aws-lambda";
+import { APIGatewayEvent } from "aws-lambda";
 import * as crypto from "crypto";
 import { ProductDB } from "../domain/product/product.controller";
 import { StockDB } from "../domain/stock/stock.controller";
