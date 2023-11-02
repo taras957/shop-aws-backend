@@ -10,6 +10,8 @@ provider:
     minimumCompressionSize: 1024
   environment:
     AWS_NODEJS_CONNECTION_REUSE_ENABLED: 1
+    SNS_ARN: 
+      Ref: SNSTopic
   stage: dev
   region: eu-west-1
   iam:
@@ -18,6 +20,19 @@ provider:
 
 resources:
   Resources:
+    SNSTopic:
+      Type: AWS::SNS::Topic
+      Properties: 
+        TopicName: createProductTopic
+    SNSSubscription: 
+      Type: AWS::SNS::Subscription
+      Properties:
+        Endpoint: taras_kornyk@epam.com
+        Protocol: email
+        TopicArn:
+          Ref: SNSTopic
+
+
     AccessDynamoDB:
       Type: AWS::IAM::Role
       Properties:
@@ -58,6 +73,15 @@ resources:
                     - dynamodb:Scan
                     - dynamodb:DeleteItem
                   Resource: "arn:aws:dynamodb:${self:provider.region}:*:table/*"
+                - Effect: Allow
+                  Action:
+                    - sqs:*
+                  Resource: "arn:aws:sqs:eu-west-1:601172069419:import-service"
+                - Effect: Allow
+                  Action:
+                    - sns:*
+                  Resource: 
+                    Ref: SNSTopic
               
     ProductsTable:
       Type: AWS::DynamoDB::Table
@@ -90,6 +114,7 @@ resources:
 functions:
   products:
     handler: ./handlers/getProducts.getProductsList
+    url: true
     environment:
       PRODUCT_TABLE_NAME: Products
       STOCK_TABLE_NAME: stock
@@ -98,10 +123,10 @@ functions:
       - http:
           path: products
           method: get
-
-
+          cors: true
   productsById:
     handler: ./handlers/productsById.getProductsById
+    url: true
     environment:
       PRODUCT_TABLE_NAME: Products
       STOCK_TABLE_NAME: stock
@@ -110,9 +135,11 @@ functions:
       - http:
           path: products/{productId}
           method: get
+          cors: true
 
   createProduct:
     handler: ./handlers/createProduct.create
+    url: true
     environment:
       PRODUCT_TABLE_NAME: Products
       STOCK_TABLE_NAME: stock
@@ -121,3 +148,18 @@ functions:
       - http:
           path: product
           method: post
+          cors: true
+  catalogBatchProcess:
+    handler: ./handlers/catalogBatchProcess.handler
+    url: true
+    environment:
+      PRODUCT_TABLE_NAME: Products
+      STOCK_TABLE_NAME: stock
+      DB_REGION: eu-west-1
+      REGION: eu-west-1
+    events:
+    - sqs:
+        batchSize: 3
+        arn: "arn:aws:sqs:eu-west-1:601172069419:import-service"
+    
+             

@@ -20,8 +20,17 @@ export async function handler(event: S3Event) {
 
     await objectController.delete(bucket, key);
 
-    return objectController.parse(s3Stream);
+    const data = await objectController.send2Queue(s3Stream);
+    return {
+      headers: {
+        "Access-Control-Allow-Origin": "*",
+        "Access-Control-Allow-Credentials": true,
+      },
+      statusCode: 200,
+      body: "Actions performed",
+    };
   } catch (error) {
+    console.log("🚀 ~ file: importFileParser.ts:33 ~ handler ~ error:", error);
     return {
       statusCode: 500,
       body: JSON.stringify({ error: "An error occurred" }),
