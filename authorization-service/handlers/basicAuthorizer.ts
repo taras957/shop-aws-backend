@@ -6,10 +6,6 @@ export const handler = async (
   _context,
   cb
 ) => {
-  console.log(
-    "🚀 ~ file: basicAuthorizer.handler.ts:5~ event:",
-    JSON.stringify(event)
-  );
   if (event["type"] !== "TOKEN") {
     cb("Unauthorized");
   }
@@ -18,19 +14,14 @@ export const handler = async (
     const methodArn = event.methodArn;
 
     const creds = authToken.split(" ")[1];
-    const buffer = Buffer.from(creds, "base64");
-    const plainCreds = buffer.toString("utf-8").split(":");
+    // Decode the base64 string
+    const decodedData = Buffer.from(creds, "base64").toString("utf8");
 
-    const userName = plainCreds[0];
-    console.log(
-      "🚀 ~ file: basicAuthorizer.handler.ts:27 ~ userName:",
-      userName
-    );
-    const password = plainCreds[1];
-    console.log(
-      "🚀 ~ file: basicAuthorizer.handler.ts:29 ~ password:",
-      password
-    );
+    const splittedData = decodedData.split(":");
+
+    const userName = splittedData[0];
+
+    const password = splittedData[1];
 
     const storedPassword = process.env[userName];
 

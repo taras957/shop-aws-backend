@@ -35,14 +35,13 @@ functions:
   importProductFiles:
     handler: ./handlers/importProductsFile.handler
     url: true
-    authorizer: arn:aws:lambda:eu-west-1:601172069419:function:authorization-service-dev-basicAuthorizer
-
     environment:
       REGION: eu-west-1
     events:
      - http:
          path: /import
          method: get
+         authorizer: arn:aws:lambda:eu-west-1:601172069419:function:authorization-service-dev-basicAuthorizer
          cors: true
          request:
             parameters:
