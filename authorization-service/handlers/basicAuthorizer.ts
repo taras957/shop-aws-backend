@@ -1,12 +1,9 @@
 import { APIGatewayTokenAuthorizerEvent } from "aws-lambda";
 import "source-map-support/register";
 
-export const handler = async (
-  event: APIGatewayTokenAuthorizerEvent,
-  _context,
-  cb
-) => {
+export const handler = async (event: APIGatewayTokenAuthorizerEvent, _, cb) => {
   if (event["type"] !== "TOKEN") {
+    //401
     cb("Unauthorized");
   }
   try {
@@ -32,6 +29,7 @@ export const handler = async (
 
     cb(null, policy);
   } catch (error) {
+    //403
     cb(`Unauthorized: ${error.message}`);
   }
 };
